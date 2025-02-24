@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "./ui/button";
 import { PlusCircle, Bell, User } from "lucide-react";
+import { signOut } from "../lib/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +26,7 @@ const DashboardHeader = ({
   userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
   onAddProduct = () => console.log("Add product clicked"),
 }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
   return (
     <header className="w-full h-20 bg-white border-b border-gray-200 px-6 flex items-center justify-between">
       <div className="flex-1">
@@ -72,9 +75,9 @@ const DashboardHeader = ({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer text-red-600"
-              onClick={() => {
-                localStorage.removeItem("user");
-                window.location.href = "/login";
+              onClick={async () => {
+                await signOut();
+                navigate("/login");
               }}
             >
               Sign out

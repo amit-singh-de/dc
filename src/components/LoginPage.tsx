@@ -7,22 +7,21 @@ import { Label } from "./ui/label";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
   const [error, setError] = React.useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const password = (form.elements.namedItem("password") as HTMLInputElement)
+    const username = (form.elements.namedItem("username") as HTMLInputElement)
+      .value;
+    const passkey = (form.elements.namedItem("passkey") as HTMLInputElement)
       .value;
 
     try {
-      const { user } = await signIn(email, password);
-      localStorage.setItem("user", JSON.stringify(user));
-      navigate("/dashboard");
+      await signIn(username, passkey);
+      navigate("/");
     } catch (err) {
-      setError("Invalid email or password");
+      setError("Invalid username or passkey");
     }
   };
 
@@ -39,26 +38,26 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              defaultValue="demo@example.com"
+              id="username"
+              type="text"
+              placeholder="Enter your username"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="passkey">Passkey</Label>
             <Input
-              id="password"
+              id="passkey"
               type="password"
-              placeholder="Enter your password"
-              defaultValue="demo123"
+              placeholder="Enter your passkey"
               required
             />
           </div>
+
+          {error && <div className="text-red-500 text-sm">{error}</div>}
 
           <Button type="submit" className="w-full">
             Sign In

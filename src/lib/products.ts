@@ -1,68 +1,46 @@
-import { supabase, mockData } from "./supabase";
-import { Product } from "../types/database";
-
-async function extractImageFromLink(url: string): Promise<string> {
-  try {
-    // If it's already an image URL, return it
-    if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      return url;
-    }
-
-    // For Amazon links
-    if (url.includes("amazon.com")) {
-      const match = url.match(/\/([A-Z0-9]{10})(?:\/|\/ref|$)/);
-      if (match) {
-        return `https://images-na.ssl-images-amazon.com/images/P/${match[1]}.01.L.jpg`;
-      }
-    }
-
-    // For other URLs, return a default image
-    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30";
-  } catch (error) {
-    console.error("Error extracting image:", error);
-    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30";
-  }
-}
+import { supabase } from "./supabase";
 
 export const getProducts = async (userId: string) => {
-  const { data, error } = await (supabase || mockData)
+  const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data as Product[];
+  return data;
 };
 
 export const addProduct = async (
   userId: string,
-  product: Omit<Product, "id" | "user_id" | "created_at" | "updated_at">,
+  product: {
+    name: string;
+    image_url: string;
+    next_reorder_date: string;
+    price?: number;
+  },
 ) => {
-  // Extract image URL from product link
-  const imageUrl = await extractImageFromLink(product.image_url);
-
-  const { data, error } = await (supabase || mockData)
+  const { data, error } = await supabase
     .from("products")
     .insert([
       {
         user_id: userId,
-        ...product,
-        image_url: imageUrl,
+        name: product.name,
+        image_url: product.image_url,
+        next_reorder_date: product.next_reorder_date,
+        price: product.price || 29.99,
+        progress: 0,
       },
     ])
     .select()
     .single();
 
   if (error) throw error;
-  return data as Product;
+  return data;
 };
 
-export const updateProduct = async (
-  productId: string,
-  updates: Partial<Product>,
-) => {
-  const { data, error } = await (supabase || mockData)
+export const updateProduct = async (productId: string, updates: any) => {
+  const { data, error } = await supabase
     .from("products")
     .update(updates)
     .eq("id", productId)
@@ -70,5 +48,5 @@ export const updateProduct = async (
     .single();
 
   if (error) throw error;
-  return data as Product;
+  return data;
 };
