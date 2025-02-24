@@ -55,7 +55,7 @@ const AddProductModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] bg-white">
+      <DialogContent className="sm:max-w-[600px] bg-card">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             Add New Product

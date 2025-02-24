@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./ui/button";
 import { PlusCircle, Bell, User } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 import { signOut } from "../lib/auth";
 import {
   DropdownMenu,
@@ -28,9 +29,9 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   return (
-    <header className="w-full h-20 bg-white border-b border-gray-200 px-6 flex items-center justify-between">
+    <header className="w-full h-20 bg-background border-b border-border px-6 flex items-center justify-between">
       <div className="flex-1">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Product Tracker
         </h1>
       </div>
@@ -49,6 +50,8 @@ const DashboardHeader = ({
           <Bell className="w-5 h-5" />
           <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
         </Button>
+
+        <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
