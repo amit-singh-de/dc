@@ -5,9 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function generateAffiliateLink(originalURL: string): string {
+export function generateAffiliateLink(productUrl: string): string {
   try {
-    const url = new URL(originalURL);
+    const url = new URL(productUrl);
     const affiliateTags: Record<string, string> = {
       shopee: "?af=tempo_aff",
       lazada: "?spm=tempo_aff",
@@ -16,12 +16,12 @@ export function generateAffiliateLink(originalURL: string): string {
 
     for (const [domain, tag] of Object.entries(affiliateTags)) {
       if (url.hostname.includes(domain)) {
-        return originalURL + (url.search ? "&" : "") + tag.substring(1);
+        return productUrl + (url.search ? "&" : "") + tag.substring(1);
       }
     }
 
-    return originalURL;
+    return productUrl;
   } catch {
-    return originalURL;
+    return productUrl;
   }
 }

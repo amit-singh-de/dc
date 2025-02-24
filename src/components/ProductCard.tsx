@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardFooter } from "./ui/card";
+import { Card } from "./ui/card";
 import Button from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Clock, RefreshCw } from "lucide-react";
@@ -14,6 +14,7 @@ interface ProductCardProps {
   id?: string;
   name?: string;
   imageUrl?: string;
+  productUrl?: string;
   progress?: number;
   nextReorderDate?: string;
   price?: number;
@@ -24,6 +25,7 @@ const ProductCard = ({
   id = "1",
   name = "Sample Product",
   imageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
+  productUrl = "https://www.amazon.com/sample-product",
   progress = 75,
   nextReorderDate = "2024-05-01",
   price = 29.99,
@@ -75,11 +77,7 @@ const ProductCard = ({
               <Progress value={progress} className="h-2" />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Reorder Progress</span>
-                <span>
-                  {isOverdue
-                    ? `Overdue by ${Math.abs(daysLeft)} days`
-                    : `Due in ${Math.abs(daysLeft)} days`}
-                </span>
+                <span>{progress}%</span>
               </div>
             </div>
 

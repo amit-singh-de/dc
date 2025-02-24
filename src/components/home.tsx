@@ -14,6 +14,7 @@ interface Product {
   id: string;
   name: string;
   imageUrl: string;
+  productUrl: string;
   progress: number;
   nextReorderDate: string;
   price?: number;
@@ -48,6 +49,7 @@ const Home = () => {
             id: p.id,
             name: p.name,
             imageUrl: p.image_url,
+            productUrl: p.product_url,
             progress: p.progress,
             nextReorderDate: p.next_reorder_date,
             price: p.price,
@@ -73,8 +75,9 @@ const Home = () => {
       const newProduct = await addProduct(user.id, {
         name: data.name,
         image_url: data.imageUrl,
+        product_url: data.productUrl,
         next_reorder_date: data.nextReorderDate.toISOString(),
-        price: 29.99,
+        price: data.price,
       });
 
       setProducts([
@@ -82,6 +85,7 @@ const Home = () => {
           id: newProduct.id,
           name: newProduct.name,
           imageUrl: newProduct.image_url,
+          productUrl: newProduct.product_url,
           progress: newProduct.progress,
           nextReorderDate: newProduct.next_reorder_date,
           price: newProduct.price,
@@ -100,7 +104,7 @@ const Home = () => {
     if (!product) return;
 
     // Generate and open affiliate link
-    const affiliateLink = generateAffiliateLink(product.imageUrl);
+    const affiliateLink = generateAffiliateLink(product.productUrl);
     window.open(affiliateLink, "_blank");
 
     try {
@@ -118,9 +122,7 @@ const Home = () => {
 
       // Update products
       setProducts(
-        products.map((product) =>
-          product.id === id ? { ...product, progress: 0 } : product,
-        ),
+        products.map((p) => (p.id === id ? { ...p, progress: 0 } : p)),
       );
     } catch (error) {
       console.error("Error updating product:", error);

@@ -16,6 +16,7 @@ export const addProduct = async (
   product: {
     name: string;
     image_url: string;
+    product_url: string;
     next_reorder_date: string;
     price?: number;
   },
@@ -27,6 +28,7 @@ export const addProduct = async (
         user_id: userId,
         name: product.name,
         image_url: product.image_url,
+        product_url: product.product_url,
         next_reorder_date: product.next_reorder_date,
         price: product.price || 29.99,
         progress: 0,

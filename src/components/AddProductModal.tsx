@@ -25,6 +25,8 @@ interface AddProductModalProps {
 interface ProductFormData {
   name: string;
   imageUrl: string;
+  productUrl: string;
+  price: number;
   reorderInterval: string;
   nextReorderDate: Date;
 }
@@ -42,6 +44,8 @@ const AddProductModal = ({
     const formData: ProductFormData = {
       name: (e.target as any).productName.value,
       imageUrl: (e.target as any).imageUrl.value,
+      productUrl: (e.target as any).productUrl.value,
+      price: parseFloat((e.target as any).price.value),
       reorderInterval: reorderInterval.toString(),
       nextReorderDate: date,
     };
@@ -70,12 +74,35 @@ const AddProductModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Product Link</Label>
+            <Label htmlFor="imageUrl">Product Image</Label>
             <Input
               id="imageUrl"
               name="imageUrl"
               placeholder="Enter image URL"
               defaultValue="https://images.unsplash.com/photo-1523275335684-37898b6baf30"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="productUrl">Product Link</Label>
+            <Input
+              id="productUrl"
+              name="productUrl"
+              placeholder="Enter product URL"
+              defaultValue="https://www.amazon.com/sample-product"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Enter product price"
+              defaultValue="29.99"
             />
           </div>
 
