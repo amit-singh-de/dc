@@ -26,8 +26,8 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="bg-card p-8 rounded-lg shadow-lg w-full max-w-md border border-border">
         <div className="flex justify-center mb-8">
           <img
             src="https://api.dicebear.com/7.x/shapes/svg?seed=logo"
@@ -44,6 +44,7 @@ const LoginPage = () => {
               type="text"
               placeholder="Enter your username"
               required
+              className="bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -54,6 +55,7 @@ const LoginPage = () => {
               type="password"
               placeholder="Enter your passkey"
               required
+              className="bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
 

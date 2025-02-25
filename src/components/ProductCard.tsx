@@ -43,7 +43,7 @@ const ProductCard = ({
   const isOverdue = progress >= 100;
 
   return (
-    <Card className="w-full max-w-sm bg-card hover:shadow-lg transition-shadow duration-200">
+    <Card className="w-full max-w-sm bg-card hover:shadow-lg transition-shadow duration-200 border-border">
       <div className="p-4 flex gap-4">
         <div className="relative h-20 w-20 flex-shrink-0">
           <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
@@ -58,13 +58,13 @@ const ProductCard = ({
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-lg font-semibold truncate">{name}</h3>
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-muted-foreground">
               ${price.toFixed(2)}
             </span>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
               <span className="truncate">
                 {isOverdue
@@ -75,7 +75,7 @@ const ProductCard = ({
 
             <div className="space-y-1.5">
               <Progress value={progress} className="h-2" />
-              <div className="flex justify-between text-xs text-gray-500">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Reorder Progress</span>
                 <span>{progress}%</span>
               </div>
@@ -87,7 +87,12 @@ const ProductCard = ({
                   <Button
                     className="w-full"
                     variant={progress >= 100 ? "default" : "secondary"}
-                    onClick={() => onReorder(id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(productUrl, "_blank");
+                      if (onReorder) onReorder(id);
+                    }}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Reorder Now

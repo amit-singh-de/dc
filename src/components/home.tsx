@@ -34,6 +34,36 @@ const Home = () => {
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<
+    Array<{ id: string; productName: string; daysLeft: number }>
+  >([]);
+
+  const checkNotifications = (products: Product[]) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const notifications = products
+      .filter((product) => {
+        const reorderDate = new Date(product.nextReorderDate);
+        reorderDate.setHours(0, 0, 0, 0);
+        const daysLeft = Math.ceil(
+          (reorderDate.getTime() - new Date().getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+        return daysLeft <= 3; // Show notifications for products due in 3 days or less
+      })
+      .map((product) => ({
+        id: product.id,
+        productName: product.name,
+        daysLeft: Math.ceil(
+          (new Date(product.nextReorderDate).getTime() - new Date().getTime()) /
+            (1000 * 60 * 60 * 24),
+        ),
+      }));
+
+    setNotifications(notifications);
+  };
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -44,17 +74,17 @@ const Home = () => {
           return;
         }
         const data = await getProducts(user.id);
-        setProducts(
-          data.map((p) => ({
-            id: p.id,
-            name: p.name,
-            imageUrl: p.image_url,
-            productUrl: p.product_url,
-            progress: p.progress,
-            nextReorderDate: p.next_reorder_date,
-            price: p.price,
-          })),
-        );
+        const mappedProducts = data.map((p) => ({
+          id: p.id,
+          name: p.name,
+          imageUrl: p.image_url,
+          productUrl: p.product_url,
+          progress: p.progress,
+          nextReorderDate: p.next_reorder_date,
+          price: p.price,
+        }));
+        setProducts(mappedProducts);
+        checkNotifications(mappedProducts);
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
@@ -138,11 +168,15 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <DashboardHeader onAddProduct={() => setIsAddModalOpen(true)} />
+    <div className="min-h-screen bg-background">
+      <DashboardHeader
+        onAddProduct={() => setIsAddModalOpen(true)}
+        notifications={notifications}
+        setNotifications={setNotifications}
+      />
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-card border-b border-border">
           <div className="container mx-auto px-4">
             <TabsList>
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
@@ -158,7 +192,13 @@ const Home = () => {
                 <EmptyState onAddProduct={() => setIsAddModalOpen(true)} />
               </div>
             ) : (
-              <ProductGrid products={products} onReorder={handleReorder} />
+              <ProductGrid
+                products={products}
+                onReorder={(id) => {
+                  console.log("Reorder clicked:", id);
+                  handleReorder(id);
+                }}
+              />
             )}
           </TabsContent>
 
