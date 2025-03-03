@@ -49,7 +49,7 @@ const ProductGrid = ({
   onReorder,
 }: ProductGridProps) => {
   return (
-    <div className="w-full min-h-[800px] bg-background p-6">
+    <div className="w-full min-h-[800px] bg-background p-4 md:p-6">
       <div className="flex flex-col gap-6 max-w-sm mx-auto">
         {products.map((product) => (
           <ProductCard

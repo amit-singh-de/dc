@@ -43,7 +43,7 @@ const ProductCard = ({
   const isOverdue = progress >= 100;
 
   return (
-    <Card className="w-full max-w-sm bg-card hover:shadow-lg transition-shadow duration-200 border-border">
+    <Card className="w-full max-w-full sm:max-w-sm bg-card hover:shadow-lg transition-shadow duration-200 border-border">
       <div className="p-4 flex gap-4">
         <div className="relative h-20 w-20 flex-shrink-0">
           <div className="w-full h-full rounded-full overflow-hidden bg-gray-100">
@@ -74,7 +74,10 @@ const ProductCard = ({
             </div>
 
             <div className="space-y-1.5">
-              <Progress value={progress} className="h-2" />
+              <Progress
+                value={progress}
+                className="h-2 bg-indigo-100 dark:bg-indigo-950"
+              />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Reorder Progress</span>
                 <span>{progress}%</span>

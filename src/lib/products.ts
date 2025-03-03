@@ -8,7 +8,19 @@ export const getProducts = async (userId: string) => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data || [];
+};
+
+export const getOrderHistory = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("user_id", userId)
+    .lt("next_reorder_date", new Date().toISOString())
+    .order("next_reorder_date", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 };
 
 export const addProduct = async (

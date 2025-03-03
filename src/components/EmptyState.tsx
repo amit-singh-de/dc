@@ -14,8 +14,8 @@ const EmptyState = ({
   description = "Start tracking your products by adding your first item.",
 }: EmptyStateProps) => {
   return (
-    <div className="flex flex-col items-center justify-center h-[400px] w-[600px] p-8 bg-card rounded-lg shadow-sm border border-border">
-      <div className="w-16 h-16 mb-6 text-gray-400">
+    <div className="flex flex-col items-center justify-center h-[400px] w-full max-w-[600px] p-4 md:p-8 bg-card rounded-lg shadow-sm border border-border">
+      <div className="w-16 h-16 mb-6 text-indigo-500">
         <PlusCircle className="w-full h-full" />
       </div>
 

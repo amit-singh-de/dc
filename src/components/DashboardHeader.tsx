@@ -39,14 +39,15 @@ const DashboardHeader = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <header className="w-full h-20 bg-background border-b border-border px-6 flex items-center justify-between">
+    <header className="w-full h-auto py-4 md:h-20 bg-background border-b border-border px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
       <div className="flex-1">
-        <h1 className="text-2xl font-semibold text-foreground">
-          Product Tracker
-        </h1>
+        <div className="flex items-center gap-2">
+          <img src="/logo.svg" alt="ReStock Logo" className="h-8 w-8" />
+          <h1 className="text-2xl font-semibold text-foreground">ReStock</h1>
+        </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto justify-between md:justify-end">
         <Button
           onClick={onAddProduct}
           className="flex items-center gap-2"

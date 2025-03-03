@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../lib/auth";
 import { generateAffiliateLink } from "../lib/utils";
-import { getProducts, addProduct, updateProduct } from "../lib/products";
+import {
+  getProducts,
+  getOrderHistory,
+  addProduct,
+  updateProduct,
+} from "../lib/products";
 import DashboardHeader from "./DashboardHeader";
 import ProductGrid from "./ProductGrid";
 import AddProductModal from "./AddProductModal";
@@ -32,6 +37,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<
@@ -66,15 +72,17 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
       try {
         const user = await getCurrentUser();
         if (!user) {
           navigate("/login");
           return;
         }
-        const data = await getProducts(user.id);
-        const mappedProducts = data.map((p) => ({
+
+        // Load products
+        const productData = await getProducts(user.id);
+        const mappedProducts = productData.map((p) => ({
           id: p.id,
           name: p.name,
           imageUrl: p.image_url,
@@ -85,14 +93,27 @@ const Home = () => {
         }));
         setProducts(mappedProducts);
         checkNotifications(mappedProducts);
+
+        // Load order history
+        const historyData = await getOrderHistory(user.id);
+        const mappedHistory = historyData.map((p) => ({
+          id: p.id,
+          productName: p.name,
+          orderDate: p.next_reorder_date,
+          imageUrl: p.image_url,
+          price: p.price || 0,
+          productUrl: p.product_url,
+        }));
+        setOrderHistory(mappedHistory);
       } catch (error) {
-        console.error("Error loading products:", error);
+        console.error("Error loading data:", error);
       } finally {
         setLoading(false);
+        setHistoryLoading(false);
       }
     };
 
-    loadProducts();
+    loadData();
   }, []);
 
   const handleAddProduct = async (data: any) => {
@@ -161,7 +182,7 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         Loading...
       </div>
     );
@@ -178,9 +199,13 @@ const Home = () => {
       <Tabs defaultValue="dashboard" className="w-full">
         <div className="bg-card border-b border-border">
           <div className="container mx-auto px-4">
-            <TabsList>
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="history">Order History</TabsTrigger>
+            <TabsList className="w-full">
+              <TabsTrigger value="dashboard" className="flex-1">
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex-1">
+                Order History
+              </TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -203,7 +228,11 @@ const Home = () => {
           </TabsContent>
 
           <TabsContent value="history">
-            <OrderHistory orders={orderHistory} />
+            <OrderHistory
+              orders={orderHistory}
+              isLoading={historyLoading}
+              onReorder={handleReorder}
+            />
           </TabsContent>
         </main>
       </Tabs>
