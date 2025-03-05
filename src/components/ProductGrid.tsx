@@ -14,6 +14,7 @@ interface Product {
 interface ProductGridProps {
   products?: Product[];
   onReorder?: (id: string) => void;
+  onEditName?: (id: string, newName: string) => void;
 }
 
 const ProductGrid = ({
@@ -47,6 +48,7 @@ const ProductGrid = ({
     },
   ],
   onReorder,
+  onEditName,
 }: ProductGridProps) => {
   return (
     <div className="w-full min-h-[800px] bg-background p-4 md:p-6">
@@ -61,6 +63,7 @@ const ProductGrid = ({
             progress={product.progress}
             nextReorderDate={product.nextReorderDate}
             onReorder={onReorder}
+            onEditName={onEditName}
             price={product.price}
           />
         ))}

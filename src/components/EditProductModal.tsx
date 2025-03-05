@@ -16,38 +16,75 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "../lib/utils";
 
-interface AddProductModalProps {
+interface EditProductModalProps {
   open?: boolean;
   onClose?: () => void;
   onSubmit?: (data: ProductFormData) => void;
+  product?: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    productUrl: string;
+    price: number;
+    reorderInterval: number;
+    nextReorderDate: Date;
+    progress: number;
+  };
 }
 
 interface ProductFormData {
+  id: string;
   name: string;
   imageUrl: string;
   productUrl: string;
   price: number;
   reorderInterval: string;
   nextReorderDate: Date;
+  progress: number;
 }
 
-const AddProductModal = ({
-  open = true,
+const EditProductModal = ({
+  open = false,
   onClose = () => {},
   onSubmit = () => {},
-}: AddProductModalProps) => {
-  const [date, setDate] = React.useState<Date>(new Date());
-  const [reorderInterval, setReorderInterval] = React.useState(30);
+  product = {
+    id: "",
+    name: "",
+    imageUrl: "",
+    productUrl: "",
+    price: 0,
+    reorderInterval: 30,
+    nextReorderDate: new Date(),
+    progress: 0,
+  },
+}: EditProductModalProps) => {
+  const [date, setDate] = React.useState<Date>(
+    product?.nextReorderDate || new Date(),
+  );
+  const [reorderInterval, setReorderInterval] = React.useState(
+    product?.reorderInterval || 30,
+  );
+  const [progress, setProgress] = React.useState(product?.progress || 0);
+
+  React.useEffect(() => {
+    if (product && product.id) {
+      setDate(new Date(product.nextReorderDate));
+      setReorderInterval(product.reorderInterval);
+      setProgress(product.progress);
+    }
+  }, [product]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData: ProductFormData = {
+      id: product.id,
       name: (e.target as any).productName.value,
       imageUrl: (e.target as any).imageUrl.value,
       productUrl: (e.target as any).productUrl.value,
       price: parseFloat((e.target as any).price.value),
       reorderInterval: reorderInterval.toString(),
       nextReorderDate: date,
+      progress: progress,
     };
     onSubmit(formData);
     onClose();
@@ -58,7 +95,7 @@ const AddProductModal = ({
       <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[600px] bg-card overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
-            Add New Product
+            Edit Product
           </DialogTitle>
         </DialogHeader>
 
@@ -69,16 +106,19 @@ const AddProductModal = ({
               id="productName"
               name="productName"
               placeholder="Enter product name"
-              defaultValue="Sample Product"
+              defaultValue={product.name}
             />
           </div>
 
-          <input
-            type="hidden"
-            id="imageUrl"
-            name="imageUrl"
-            value="https://images.unsplash.com/photo-1523275335684-37898b6baf30"
-          />
+          <div className="space-y-2">
+            <Label htmlFor="imageUrl">Product Image</Label>
+            <Input
+              id="imageUrl"
+              name="imageUrl"
+              placeholder="Enter image URL"
+              defaultValue={product.imageUrl}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="productUrl">Product Link</Label>
@@ -86,7 +126,7 @@ const AddProductModal = ({
               id="productUrl"
               name="productUrl"
               placeholder="Enter product URL"
-              defaultValue="https://www.amazon.com/sample-product"
+              defaultValue={product.productUrl}
             />
           </div>
 
@@ -99,7 +139,7 @@ const AddProductModal = ({
               step="0.01"
               min="0"
               placeholder="Enter product price"
-              defaultValue="29.99"
+              defaultValue={product.price}
             />
           </div>
 
@@ -117,6 +157,22 @@ const AddProductModal = ({
               step={1}
               value={[reorderInterval]}
               onValueChange={(value) => setReorderInterval(value[0])}
+              className="py-2"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label htmlFor="progress">Progress</Label>
+              <span className="text-sm text-muted-foreground">{progress}%</span>
+            </div>
+            <Slider
+              id="progress"
+              min={0}
+              max={100}
+              step={1}
+              value={[progress]}
+              onValueChange={(value) => setProgress(value[0])}
               className="py-2"
             />
           </div>
@@ -151,7 +207,7 @@ const AddProductModal = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add Product</Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -159,4 +215,4 @@ const AddProductModal = ({
   );
 };
 
-export default AddProductModal;
+export default EditProductModal;
