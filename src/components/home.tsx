@@ -11,6 +11,7 @@ import {
 import DashboardHeader from "./DashboardHeader";
 import ProductGrid from "./ProductGrid";
 import AddProductModal from "./AddProductModal";
+// import EditProductModal from "./EditProductModal";
 import EmptyState from "./EmptyState";
 import OrderHistory from "./OrderHistory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -39,6 +40,8 @@ const Home = () => {
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<
     Array<{ id: string; productName: string; daysLeft: number }>
@@ -115,6 +118,61 @@ const Home = () => {
 
     loadData();
   }, []);
+
+  const handleEditProductName = async (id: string, newName: string) => {
+    try {
+      await updateProduct(id, { name: newName });
+
+      // Update products state
+      setProducts(
+        products.map((p) => (p.id === id ? { ...p, name: newName } : p)),
+      );
+
+      // Update notifications if needed
+      setNotifications(
+        notifications.map((n) =>
+          n.id === id ? { ...n, productName: newName } : n,
+        ),
+      );
+    } catch (error) {
+      console.error("Error updating product name:", error);
+    }
+  };
+
+  const handleEditProductUrl = async (id: string, newUrl: string) => {
+    try {
+      await updateProduct(id, { product_url: newUrl });
+      setProducts(
+        products.map((p) => (p.id === id ? { ...p, productUrl: newUrl } : p)),
+      );
+    } catch (error) {
+      console.error("Error updating product URL:", error);
+    }
+  };
+
+  const handleEditProductPrice = async (id: string, newPrice: number) => {
+    try {
+      await updateProduct(id, { price: newPrice });
+      setProducts(
+        products.map((p) => (p.id === id ? { ...p, price: newPrice } : p)),
+      );
+    } catch (error) {
+      console.error("Error updating product price:", error);
+    }
+  };
+
+  const handleEditReorderInterval = async (id: string, newInterval: number) => {
+    try {
+      await updateProduct(id, { reorder_interval: newInterval });
+      // You would need to update the product in the state, but since reorderInterval
+      // isn't directly stored in the product state, you might need to adjust this
+      console.log(
+        `Updated reorder interval for product ${id} to ${newInterval} days`,
+      );
+    } catch (error) {
+      console.error("Error updating reorder interval:", error);
+    }
+  };
 
   const handleAddProduct = async (data: any) => {
     try {
@@ -223,6 +281,7 @@ const Home = () => {
                   console.log("Reorder clicked:", id);
                   handleReorder(id);
                 }}
+                onEditName={handleEditProductName}
               />
             )}
           </TabsContent>
@@ -242,6 +301,8 @@ const Home = () => {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddProduct}
       />
+
+      {/* Edit modal removed */}
     </div>
   );
 };
