@@ -60,12 +60,19 @@ export const signUp = async (email: string, password: string) => {
 
 export const resetPassword = async (email: string) => {
   try {
-    // Generate a 6-digit verification code
+    // Call Supabase's built-in password reset method to trigger email sending
+    const { data, error } =
+      await supabase.auth.api.resetPasswordForEmail(email);
+
+    if (error) {
+      console.error("Error sending reset email:", error);
+      throw new Error("Failed to send password reset email. Please try again.");
+    }
+
+    // Store the code in a database table for verification (if you still need to store the code)
     const verificationCode = Math.floor(
       100000 + Math.random() * 900000,
     ).toString();
-
-    // Store the code in a database table for verification
     const { error: storeError } = await supabase
       .from("password_reset_codes")
       .upsert([
@@ -82,20 +89,7 @@ export const resetPassword = async (email: string) => {
       throw new Error("Failed to store verification code. Please try again.");
     }
 
-    // Send the verification code via email using Supabase Edge Function
-    const { error: emailError } = await supabase.functions.invoke(
-      "send-verification-code",
-      {
-        body: { email, code: verificationCode },
-      },
-    );
-
-    if (emailError) {
-      console.error("Error sending email:", emailError);
-      throw new Error("Failed to send verification email. Please try again.");
-    }
-
-    return { success: true };
+    return { success: true, message: "Password reset email sent." };
   } catch (error) {
     console.error("Error sending reset code:", error);
     throw new Error("Failed to send verification code. Please try again.");
