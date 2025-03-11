@@ -6,13 +6,15 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Separator } from "./ui/separator";
-import { Facebook, Github, Mail } from "lucide-react";
+import { Facebook, Github, Mail, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -142,9 +144,30 @@ const LoginPage = () => {
                   required
                   className="bg-background text-foreground placeholder:text-muted-foreground"
                 />
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-xs p-0 h-auto"
+                    onClick={() => setIsForgotPasswordOpen(true)}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
               </div>
 
-              {error && <div className="text-sm text-destructive">{error}</div>}
+              {error && (
+                <div
+                  className={`text-sm ${error.includes("successful") ? "text-green-600" : "text-destructive"} flex items-center gap-2`}
+                >
+                  {error.includes("successful") ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  <span>{error}</span>
+                </div>
+              )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -245,7 +268,18 @@ const LoginPage = () => {
                 />
               </div>
 
-              {error && <div className="text-sm text-destructive">{error}</div>}
+              {error && (
+                <div
+                  className={`text-sm ${error.includes("successful") ? "text-green-600" : "text-destructive"} flex items-center gap-2`}
+                >
+                  {error.includes("successful") ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  <span>{error}</span>
+                </div>
+              )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing up..." : "Sign Up"}
@@ -312,6 +346,11 @@ const LoginPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ForgotPasswordModal
+        open={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 };

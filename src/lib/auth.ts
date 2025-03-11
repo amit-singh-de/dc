@@ -58,6 +58,179 @@ export const signUp = async (email: string, password: string) => {
   return data;
 };
 
+export const resetPassword = async (email: string) => {
+  try {
+    // Generate a 6-digit verification code
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+
+    // Store the code in a database table for verification
+    const { error: storeError } = await supabase
+      .from("password_reset_codes")
+      .upsert([
+        {
+          email,
+          code: verificationCode,
+          created_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes expiry
+        },
+      ]);
+
+    if (storeError) {
+      console.error("Error storing verification code:", storeError);
+      throw new Error("Failed to store verification code. Please try again.");
+    }
+
+    // Send the verification code via email using Supabase Edge Function
+    const { error: emailError } = await supabase.functions.invoke(
+      "send-verification-code",
+      {
+        body: { email, code: verificationCode },
+      },
+    );
+
+    if (emailError) {
+      console.error("Error sending email:", emailError);
+      throw new Error("Failed to send verification email. Please try again.");
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending reset code:", error);
+    throw new Error("Failed to send verification code. Please try again.");
+  }
+};
+
+export const verifyResetCode = async (email: string, code: string) => {
+  try {
+    // Verify from the database only
+    const { data, error } = await supabase
+      .from("password_reset_codes")
+      .select("*")
+      .eq("email", email)
+      .eq("code", code)
+      .gt("expires_at", new Date().toISOString())
+      .single();
+
+    if (error) {
+      console.error("Error verifying code:", error);
+      throw new Error(
+        "Invalid or expired verification code. Please try again.",
+      );
+    }
+
+    if (!data) {
+      throw new Error(
+        "Invalid or expired verification code. Please try again.",
+      );
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    throw new Error("Invalid or expired verification code. Please try again.");
+  }
+};
+
+export const resetPasswordWithCode = async (
+  email: string,
+  code: string,
+  newPassword: string,
+) => {
+  try {
+    // First verify the code
+    await verifyResetCode(email, code);
+
+    // Sign in with OTP to get a session
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
+
+    if (signInError) {
+      throw signInError;
+    }
+
+    // Update the user's password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // Clean up the verification code from database
+    await supabase.from("password_reset_codes").delete().eq("email", email);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    throw new Error("Failed to reset password. Please try again.");
+  }
+};
+
+export const confirmPasswordReset = async (
+  accessToken: string,
+  newPassword: string,
+) => {
+  // Set the access token in the session
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: "",
+  });
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  // Get the current user
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) {
+    throw new Error("Invalid or expired reset token");
+  }
+
+  // Get password history for this user
+  const { data: userHistory, error: historyError } = await supabase
+    .from("users")
+    .select("password_history")
+    .eq("id", userData.user.id)
+    .single();
+
+  if (historyError && historyError.code !== "PGRST116") {
+    // Not found is ok for new users
+    throw historyError;
+  }
+
+  // Check if password was used before (simplified check)
+  if (
+    userHistory?.password_history &&
+    userHistory.password_history.length > 0
+  ) {
+    // In a real implementation, we can't directly compare with previous passwords
+    // This is just a placeholder for the concept
+    console.log(
+      "Password history exists, would check here in a real implementation",
+    );
+  }
+
+  // Update the password
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  // Sign out after password reset
+  await supabase.auth.signOut();
+};
+
 export const updatePassword = async (password: string) => {
   // Get the current user
   const { data: userData } = await supabase.auth.getUser();
